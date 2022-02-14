@@ -1,0 +1,45 @@
+
+language: node_js
+node_js:
+  - 14
+
+services:
+  -  docker
+
+cache: yarn
+
+install: yarn
+
+# Assume bundler is being used, therefore
+# the `install` step will run `bundle install` by default.
+script: 
+  - yarn build
+
+
+# branch whitelist, only for GitHub Pages
+branches:
+  only:
+    - main # We only want to build stuff from our master branch.. we'll deploy to gh-pages later though
+
+
+# Optional: disable email notifications about the outcome of your builds
+notifications:
+  email: false
+
+deploy:
+  - provider: pages
+    local_dir: ./portfolio-website-template/dist
+    skip_cleanup: true
+    github_token: $GH_ACCESS_TOKEN  # Set in the settings page of your repository, as a secure variable
+    keep_history: true
+    on:
+      condition: $BUILD_TARGET = pages
+      branch: main
+    target_branch: gh-pages
+    github_url: github.ibm.com
+  - provider: script
+    script: bash deploy-container.sh
+    skip_cleanup: true
+    on:
+      condition: $BUILD_TARGET = ibmcloud
+      branch: main
